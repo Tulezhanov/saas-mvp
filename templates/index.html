@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Заявки</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #f0f2f5; }
+    header {
+      background: #1a1a2e; color: white;
+      padding: 16px 24px; font-size: 18px;
+    }
+    .stats {
+      display: flex; gap: 12px; padding: 20px 24px 0;
+    }
+    .stat {
+      background: white; border-radius: 10px;
+      padding: 14px 20px; flex: 1;
+    }
+    .stat .n { font-size: 28px; font-weight: bold; }
+    .stat .l { font-size: 13px; color: #888; }
+    .stat.blue .n  { color: #3b82f6; }
+    .stat.amber .n { color: #d97706; }
+    .stat.green .n { color: #16a34a; }
+    .container { padding: 20px 24px; }
+    .card {
+      background: white; border-radius: 10px; overflow: hidden;
+    }
+    .card-top {
+      padding: 14px 20px; font-weight: bold;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex; justify-content: space-between;
+    }
+    .refresh {
+      font-size: 13px; color: #3b82f6;
+      background: #eff6ff; padding: 6px 12px;
+      border-radius: 8px; text-decoration: none;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left; padding: 10px 16px;
+      font-size: 12px; color: #888;
+      background: #fafafa;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    td {
+      padding: 12px 16px; font-size: 14px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .badge {
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 500;
+    }
+    .tg { background: #e0f2fe; color: #0284c7; }
+    .wa { background: #dcfce7; color: #15803d; }
+    .status {
+      padding: 4px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 500;
+      border: none; cursor: pointer;
+    }
+    .s-new         { background: #fee2e2; color: #dc2626; }
+    .s-in_progress { background: #fef3c7; color: #d97706; }
+    .s-done        { background: #dcfce7; color: #15803d; }
+    .empty {
+      text-align: center; padding: 60px;
+      color: #aaa; font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<header>📋 Панель заявок</header>
+
+{% set total = leads | length %}
+{% set new_c = leads | selectattr("status","equalto","new") | list | length %}
+{% set done_c = leads | selectattr("status","equalto","done") | list | length %}
+
+<div class="stats">
+  <div class="stat blue">
+    <div class="n">{{ total }}</div>
+    <div class="l">Всего</div>
+  </div>
+  <div class="stat amber">
+    <div class="n">{{ new_c }}</div>
+    <div class="l">Новых</div>
+  </div>
+  <div class="stat green">
+    <div class="n">{{ done_c }}</div>
+    <div class="l">Закрытых</div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <div class="card-top">
+      Все заявки
+      <a href="/" class="refresh">🔄 Обновить</a>
+    </div>
+
+    {% if leads %}
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Источник</th>
+          <th>Клиент</th>
+          <th>Сообщение</th>
+          <th>Дата</th>
+          <th>Статус</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lead in leads %}
+        <tr>
+          <td>{{ lead.id }}</td>
+          <td>
+            {% if lead.source == "telegram" %}
+              <span class="badge tg">Telegram</span>
+            {% else %}
+              <span class="badge wa">WhatsApp</span>
+            {% endif %}
+          </td>
+          <td>{{ lead.name }}</td>
+          <td>{{ lead.message }}</td>
+          <td>{{ lead.created_at }}</td>
+          <td>
+            <button
+              class="status s-{{ lead.status }}"
+              onclick="cycle({{ lead.id }}, '{{ lead.status }}', this)">
+              {% if lead.status == 'new' %}🔴 Новая
+              {% elif lead.status == 'in_progress' %}🟡 В работе
+              {% else %}🟢 Готово{% endif %}
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty">
+      Заявок пока нет —
+      <a href="/test-lead">добавить тестовую</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+const cycle = { new: 'in_progress', in_progress: 'done', done: 'new' };
+const labels = { new: '🔴 Новая', in_progress: '🟡 В работе', done: '🟢 Готово' };
+
+async function cycle(id, cur, btn) {
+  const next = cycle[cur];
+  await fetch(`/status/${id}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status: next })
+  });
+  btn.className = `status s-${next}`;
+  btn.textContent = labels[next];
+  btn.onclick = () => cycle(id, next, btn);
+}
+</script>
+
+</body>
+</html>

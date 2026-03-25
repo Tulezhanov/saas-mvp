@@ -1,0 +1,4 @@
+flask  
+aiogram  
+twilio  
+python-dotenv 
