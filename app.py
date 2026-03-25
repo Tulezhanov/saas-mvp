@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from database import init_db, get_all_leads, save_lead
-import sqlite3 import os
+import sqlite3
+import os
 
 app = Flask(__name__)
 
