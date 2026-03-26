@@ -45,6 +45,7 @@ async def start_bot():
     token = os.environ.get("TELEGRAM_TOKEN")
     print(f"DEBUG: token = {token}")
     bot = Bot(token=token)
+    dp = Dispatcher()
 
     @dp.message(F.text)
     async def handle_message(message: Message):
@@ -52,13 +53,13 @@ async def start_bot():
         text = message.text
         contact = str(message.from_user.id)
         save_lead("telegram", name, contact, text)
-        print(f"💾 Сохранено: [{name}] {text}")
+        print(f"Сохранено: [{name}] {text}")
         await message.answer(
-            "✅ Ваша заявка принята!\n"
+            "Ваша заявка принята!\n"
             "Мы свяжемся с вами в ближайшее время."
         )
 
-    print("🤖 Бот запущен!")
+    print("Бот запущен!")
     await dp.start_polling(bot)
 
 def run_bot():
