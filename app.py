@@ -42,8 +42,9 @@ def test_lead():
     return "✅ Тестовая заявка добавлена! <a href='/'>Вернуться</a>"
 
 async def start_bot():
-    bot = Bot(token=TOKEN)
-    dp = Dispatcher()
+    token = os.environ.get("TELEGRAM_TOKEN")
+    print(f"DEBUG: token = {token}")
+    bot = Bot(token=token)
 
     @dp.message(F.text)
     async def handle_message(message: Message):
