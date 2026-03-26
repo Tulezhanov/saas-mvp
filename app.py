@@ -1,16 +1,17 @@
-from flask import Flask, render_template, request, jsonify
-from database import init_db, get_all_leads, save_lead
-import sqlite3
 import os
-import threading
-import asyncio
-from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message
 from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 print(f"TOKEN загружен: {TOKEN is not None}")
+
+from flask import Flask, render_template, request, jsonify
+from database import init_db, get_all_leads, save_lead
+import sqlite3
+import threading
+import asyncio
+from aiogram import Bot, Dispatcher, F
+from aiogram.types import Message
 
 app = Flask(__name__)
 DB_PATH = "db/database.sqlite"
@@ -40,7 +41,6 @@ def test_lead():
     save_lead("telegram", "Тест", "00000", "Тестовая заявка")
     return "✅ Тестовая заявка добавлена! <a href='/'>Вернуться</a>"
 
-# Telegram бот
 async def start_bot():
     bot = Bot(token=TOKEN)
     dp = Dispatcher()
@@ -65,9 +65,7 @@ def run_bot():
 
 if __name__ == "__main__":
     init_db()
-    # Запускаем бота в отдельном потоке
     bot_thread = threading.Thread(target=run_bot, daemon=True)
     bot_thread.start()
-    # Запускаем веб-панель
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
