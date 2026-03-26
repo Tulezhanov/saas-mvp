@@ -2,8 +2,8 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-TOKEN = os.getenv("TELEGRAM_TOKEN")
-print(f"TOKEN загружен: {TOKEN is not None}")
+TOKEN = os.environ.get("TELEGRAM_TOKEN") or os.getenv("TELEGRAM_TOKEN")
+print(f"DEBUG TOKEN: '{TOKEN}'")
 
 from flask import Flask, render_template, request, jsonify
 from database import init_db, get_all_leads, save_lead
