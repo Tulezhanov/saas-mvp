@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv("TELEGRAM_TOKEN")
+print(f"TOKEN загружен: {TOKEN is not None}")
 
 app = Flask(__name__)
 DB_PATH = "db/database.sqlite"
